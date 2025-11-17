@@ -7,6 +7,7 @@ import os
 import sys
 import warnings
 import io
+import plotly.express as px
 warnings.filterwarnings('ignore')
 
 # Add src directory to path for imports
@@ -15,63 +16,366 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 # Page config must be first
 st.set_page_config(page_title="RituCare 🌸", page_icon="🌸", layout="wide")
 
-# Custom CSS for glass-morphism and pastel theme
+# Enhanced CSS for modern wellness UI
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
     body {
-        background: linear-gradient(135deg, #f7c6e8, #f3e5f5, #ffe4f7, #d9b3ff);
-        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #fef7ff, #f8e8ff, #fce4ff, #f0e6ff, #fce8ff);
+        background-attachment: fixed;
+        animation: fadeIn 0.8s ease-in-out;
+        margin: 0;
+        padding: 0;
     }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 20px;
-        margin: 10px 0;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 182, 193, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+
+    .ritucard {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 24px;
+        margin: 16px 0;
+        box-shadow: 0 12px 40px rgba(255, 182, 193, 0.15), 0 4px 16px rgba(255, 105, 180, 0.1);
+        border: 1px solid rgba(255, 192, 203, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ritucard:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 48px rgba(255, 182, 193, 0.2), 0 8px 24px rgba(255, 105, 180, 0.15);
+    }
+
     .header {
         text-align: center;
-        color: #d9b3ff;
-        font-size: 2.5em;
-        font-weight: bold;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ff9ecd, #d9a3ff, #ffb3d9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.8em;
+        font-weight: 700;
+        margin-bottom: 24px;
+        position: relative;
     }
-    .sidebar .sidebar-content {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
+
+    .header::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 3px;
+        background: linear-gradient(90deg, #ff9ecd, #d9a3ff, #ffb3d9);
+        border-radius: 2px;
     }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
+        color: #6b46c1;
+        margin-bottom: 16px;
+    }
+
+    .section-header {
+        text-align: center;
+        background: linear-gradient(135deg, #ff9ecd, #d9a3ff, #ffb3d9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.8em;
+        font-weight: 600;
+        margin: 32px 0 20px 0;
+        position: relative;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, #ff9ecd, #d9a3ff, #ffb3d9);
+        border-radius: 1px;
+    }
+
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, rgba(255, 182, 193, 0.1), rgba(217, 163, 255, 0.1));
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 192, 203, 0.2);
+        border-radius: 0 24px 24px 0;
+        padding: 24px 16px;
+    }
+
+    [data-testid="stSidebar"] .stRadio {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 4px 16px rgba(255, 182, 193, 0.1);
+    }
+
+    /* Button Styling */
     .stButton>button {
-        background: linear-gradient(45deg, #ffb6c1, #dda0dd);
+        background: linear-gradient(135deg, #ff9ecd, #d9a3ff);
         color: white;
-        border-radius: 25px;
+        border-radius: 20px;
         border: none;
-        padding: 10px 20px;
-        font-size: 1em;
-        transition: transform 0.2s;
+        padding: 12px 24px;
+        font-size: 1.1em;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(255, 156, 205, 0.3);
+        text-transform: none;
+        letter-spacing: 0.5px;
     }
+
     .stButton>button:hover {
-        transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(255, 156, 205, 0.4);
+        background: linear-gradient(135deg, #ff8ac7, #c78eff);
     }
+
+    .stButton>button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(255, 156, 205, 0.3);
+    }
+
+    /* Progress Bar Styling */
     .progress-bar {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-        height: 20px;
+        background: rgba(255, 182, 193, 0.2);
+        border-radius: 12px;
+        height: 24px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .progress-fill {
-        background: linear-gradient(90deg, #ff69b4, #ffc0cb);
+        background: linear-gradient(90deg, #ff69b4, #ffb3d9, #d9a3ff);
         height: 100%;
-        border-radius: 10px;
+        border-radius: 12px;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
     }
-    .emoji {
-        font-size: 1.5em;
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
     }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Form Styling */
+    .stForm {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(255, 182, 193, 0.15);
+        border: 1px solid rgba(255, 192, 203, 0.2);
+    }
+
+    /* Input Styling */
+    .stTextInput>div>div>input,
+    .stNumberInput>div>div>input,
+    .stSelectbox>div>div>select,
+    .stDateInput>div>input {
+        border-radius: 12px;
+        border: 2px solid rgba(255, 182, 193, 0.3);
+        padding: 12px 16px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .stTextInput>div>div>input:focus,
+    .stNumberInput>div>div>input:focus,
+    .stSelectbox>div>div>select:focus,
+    .stDateInput>div>input:focus {
+        border-color: #ff9ecd;
+        box-shadow: 0 0 0 3px rgba(255, 156, 205, 0.1);
+        outline: none;
+    }
+
+    /* Checkbox Styling */
+    .stCheckbox {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 8px 16px;
+        margin: 4px 0;
+        transition: all 0.3s ease;
+    }
+
+    .stCheckbox:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateX(4px);
+    }
+
+    /* DataFrame Styling */
+    .stDataFrame {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(255, 182, 193, 0.1);
+    }
+
+    .stDataFrame table {
+        border-radius: 16px;
+    }
+
+    .stDataFrame thead th {
+        background: linear-gradient(135deg, #ff9ecd, #d9a3ff);
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .stDataFrame tbody td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 182, 193, 0.1);
+    }
+
+    .stDataFrame tbody tr:nth-child(even) {
+        background: rgba(255, 182, 193, 0.05);
+    }
+
+    .stDataFrame tbody tr:hover {
+        background: rgba(255, 182, 193, 0.1);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    /* Chart Styling */
+    .stPlotlyChart {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(255, 182, 193, 0.1);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Success/Warning/Error Messages */
+    .stSuccess, .stInfo, .stWarning, .stError {
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin: 12px 0;
+        border: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .stSuccess {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+    }
+
+    .stInfo {
+        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+        color: #0c5460;
+    }
+
+    .stWarning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        color: #856404;
+    }
+
+    .stError {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+    }
+
+    /* Footer */
     .footer {
         text-align: center;
-        color: #888;
-        font-size: 0.8em;
-        margin-top: 50px;
+        color: #8b5cf6;
+        font-size: 0.9em;
+        margin-top: 40px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* Emoji Styling */
+    .emoji {
+        font-size: 1.5em;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .header {
+            font-size: 2.2em;
+        }
+
+        .ritucard {
+            padding: 16px;
+            margin: 8px 0;
+        }
+
+        .stButton>button {
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+    }
+
+    /* Animation for page transitions */
+    .main .block-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 182, 193, 0.1);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #ff9ecd, #d9a3ff);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #ff8ac7, #c78eff);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -194,18 +498,11 @@ if page == "🌸 Dashboard":
         else:
             nutrition_tip = "🌸 Eat balanced meals, stay hydrated, and listen to your body’s needs."
 
-        # Display the phase and nutrition advice
+    # Display the phase and nutrition advice
         with st.container():
             st.markdown(
                 f"""
-                <div style='
-                    background-color:#fff;
-                    border-radius:16px;
-                    padding:15px 20px;
-                    box-shadow:0 2px 8px rgba(255,192,203,0.3);
-                    font-size:15px;
-                    color:#444;
-                '>
+                <div class='ritucard'>
                 <h4 style='color:#d63384;'>Current Phase: {phase_name}</h4>
                 <div style='margin-top:8px; line-height:1.6;'>{nutrition_tip}</div>
                 </div>
@@ -299,13 +596,99 @@ elif page == "📝 Log Period":
         # Select only existing columns to avoid KeyError if CSV has old structure
         available_cols = ['date_start', 'date_end', 'flow', 'mood', 'symptoms', 'notes']
         existing_cols = [col for col in available_cols if col in recent_cycles.columns]
-        st.dataframe(recent_cycles[existing_cols])
+        # Add serial number column
+        recent_cycles_display = recent_cycles[existing_cols].reset_index(drop=True)
+        recent_cycles_display.insert(0, 'S.No.', range(1, len(recent_cycles_display) + 1))
+        # Format date columns to show only date without time
+        if 'date_start' in recent_cycles_display.columns:
+            recent_cycles_display['date_start'] = recent_cycles_display['date_start'].dt.date
+        if 'date_end' in recent_cycles_display.columns:
+            recent_cycles_display['date_end'] = recent_cycles_display['date_end'].dt.date
+        st.dataframe(recent_cycles_display)
     else:
         st.info("No cycles logged yet.")
 
+    # Delete Specific Cycle
+    st.markdown('<div class="glass-card"><h4>Delete Specific Cycle</h4><p>Select a cycle to delete from your recent history.</p></div>', unsafe_allow_html=True)
+    if not recent_cycles.empty:
+        cycle_options = recent_cycles['date_start'].dt.strftime('%Y-%m-%d').tolist()
+        selected_cycle = st.selectbox("Select Cycle Start Date to Delete", cycle_options, key="delete_cycle")
+        if st.button("Delete Selected Cycle 💔"):
+            selected_date = pd.to_datetime(selected_cycle)
+            logs = logs[logs['date_start'] != selected_date]
+            save_logs(logs)
+            st.success("Cycle deleted successfully! 🌸")
+            st.rerun()
+    else:
+        st.info("No cycles available to delete.")
+
 elif page == "💧 Water Tracker":
     st.markdown('<div class="header">Water Tracker 💧</div>', unsafe_allow_html=True)
-    st.info("Water tracking feature coming soon! 🌸")
+
+    # Load or set default goal
+    goal_key = "water_goal"
+    if goal_key not in st.session_state:
+        st.session_state[goal_key] = 10  # Default 10 glasses
+
+    # Goal customization
+    st.markdown('<div class="glass-card"><h4>Customize Your Daily Goal</h4></div>', unsafe_allow_html=True)
+    new_goal = st.slider("Daily Water Goal (glasses)", min_value=1, max_value=20, value=st.session_state[goal_key], step=1)
+    if new_goal != st.session_state[goal_key]:
+        st.session_state[goal_key] = new_goal
+        st.success("Goal updated! 💧")
+
+    # Current progress
+    today = datetime.now().date()
+    water_logs = logs[pd.isna(logs['date_start']) & pd.notna(logs['date']) & (logs['date'].dt.date == today)] if not logs.empty else pd.DataFrame()
+    current_glasses = int(water_logs['water_glasses'].sum()) if not water_logs.empty else 0
+    goal = st.session_state[goal_key]
+    progress = min(current_glasses / goal * 100, 100)
+
+    st.markdown('<div class="glass-card"><h4>Today\'s Progress</h4></div>', unsafe_allow_html=True)
+    st.write(f"**{current_glasses} / {goal} glasses**")
+    st.markdown(f'<div class="progress-bar"><div class="progress-fill" style="width:{progress}%"></div></div>', unsafe_allow_html=True)
+
+    # Add/Remove water
+    st.markdown('<div class="glass-card"><h4>Log Water Intake</h4></div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("➕ Add 1 Glass 💧"):
+            new_log = pd.DataFrame([{
+                'date': pd.Timestamp(today),
+                'water_glasses': 1.0
+            }])
+            logs = pd.concat([logs, new_log], ignore_index=True)
+            save_logs(logs)
+            st.rerun()
+    with col2:
+        if st.button("➖ Remove 1 Glass ❌") and current_glasses > 0:
+            # Remove the last added glass for today
+            today_entries = logs[(logs['date'].dt.date == today) & pd.notna(logs['water_glasses'])]
+            if not today_entries.empty:
+                last_entry_idx = today_entries.index[-1]
+                logs = logs.drop(last_entry_idx)
+                save_logs(logs)
+                st.rerun()
+
+    # Reset today's water
+    if st.button("🔄 Reset Today 💧"):
+        # Remove all water entries for today
+        logs = logs[~((logs['date'].dt.date == today) & pd.notna(logs['water_glasses']))]
+        save_logs(logs)
+        st.success("Today's water log reset! 💧")
+        st.rerun()
+
+    # Recent history
+    st.markdown('<div class="glass-card"><h4>Recent Water History</h4></div>', unsafe_allow_html=True)
+    water_logs_all = logs[pd.isna(logs['date_start']) & pd.notna(logs['date'])]
+    if not water_logs_all.empty:
+        # Aggregate by date to show total glasses per day
+        water_history = water_logs_all.groupby(water_logs_all['date'].dt.date)['water_glasses'].sum().reset_index()
+        water_history.columns = ['date', 'total_glasses']
+        water_history = water_history.sort_values('date', ascending=False).head(10)
+        st.dataframe(water_history, use_container_width=True)
+    else:
+        st.info("No water logs yet. Start tracking! 💧")
 
 elif page == "❤️ PCOS Check":
     st.markdown('<div class="header">PCOS Wellness Check 🎗️🌸</div>', unsafe_allow_html=True)
@@ -463,7 +846,11 @@ elif page == "📊 Insights & Export":
             if cycle_lengths:
                 cycle_dates = sorted_logs['date_start'].iloc[1:len(cycle_lengths)+1]
                 cycle_df = pd.DataFrame({'Date': cycle_dates, 'Cycle Length': cycle_lengths})
-                st.line_chart(cycle_df.set_index('Date'), color="#ffb6c1")
+                # Sort by Date to maintain chronological trend
+                cycle_df = cycle_df.sort_values('Date')
+                fig = px.line(cycle_df, x='Cycle Length', y='Date', title='', markers=True, color_discrete_sequence=["#ffb6c1"])
+                fig.update_layout(xaxis_title='Cycle Length (days)', yaxis_title='Date')
+                st.plotly_chart(fig, use_container_width=True)
 
             st.markdown('<div class="glass-card"><h4>Symptom Frequency</h4></div>', unsafe_allow_html=True)
             if all_symptoms:
@@ -570,29 +957,34 @@ elif page == "📊 Insights & Export":
         cleaned_df = logs.dropna(axis=1, how='all')  # Drop completely empty columns
         cleaned_df.columns = [col.strip().lower().replace(" ", "_") for col in cleaned_df.columns]  # Normalize headers
 
-        # Calculate summary metrics
-        period_logs = cleaned_df.dropna(subset=['date_start', 'date_end'])
-        if not period_logs.empty:
-            period_logs['date_start'] = pd.to_datetime(period_logs['date_start'], errors='coerce')
-            period_logs['date_end'] = pd.to_datetime(period_logs['date_end'], errors='coerce')
-            cycle_lengths = []
-            for i in range(1, len(period_logs)):
-                cycle_len = (period_logs.iloc[i]['date_start'] - period_logs.iloc[i-1]['date_end']).days
-                if cycle_len > 0:
-                    cycle_lengths.append(cycle_len)
-            avg_cycle_length = round(np.mean(cycle_lengths), 1) if cycle_lengths else "N/A"
+        # Separate period logs and water logs for better organization
+        period_columns = ['user_id', 'date_start', 'date_end', 'flow', 'mood', 'symptoms', 'notes']
+        available_period_columns = [col for col in period_columns if col in cleaned_df.columns]
+        period_logs = cleaned_df.dropna(subset=['date_start', 'date_end'])[available_period_columns]
+        water_logs_all = cleaned_df[cleaned_df['date_start'].isna() & cleaned_df['date'].notna()][['date', 'water_glasses']]
+
+        # Aggregate water logs by date to show daily totals
+        if not water_logs_all.empty:
+            water_daily_totals = water_logs_all.groupby(water_logs_all['date'].dt.date)['water_glasses'].sum().reset_index()
+            water_daily_totals.columns = ['date', 'total_water_glasses']
+            water_daily_totals['date'] = pd.to_datetime(water_daily_totals['date'])
         else:
-            avg_cycle_length = "N/A"
+            water_daily_totals = pd.DataFrame(columns=['date', 'total_water_glasses'])
+
+        # Use the same average cycle length calculation as the dashboard insights
+        avg_cycle_length = round(avg_cycle, 1) if cycle_lengths else "N/A"
 
         most_common_mood = (
-            cleaned_df['mood'].mode()[0] if 'mood' in cleaned_df.columns and not cleaned_df['mood'].isna().all() else "N/A"
+            period_logs['mood'].mode()[0] if 'mood' in period_logs.columns and not period_logs['mood'].isna().all() else "N/A"
         )
 
         most_common_symptom = (
-            cleaned_df['symptoms'].mode()[0] if 'symptoms' in cleaned_df.columns and not cleaned_df['symptoms'].isna().all() else "N/A"
+            period_logs['symptoms'].mode()[0] if 'symptoms' in period_logs.columns and not period_logs['symptoms'].isna().all() else "N/A"
         )
 
         total_logged_cycles = len(period_logs) if not period_logs.empty else 0
+        total_water_days = len(water_daily_totals) if not water_daily_totals.empty else 0
+        avg_daily_water = round(water_daily_totals['total_water_glasses'].mean(), 1) if not water_daily_totals.empty else "N/A"
 
         # Create summary text block
         summary_lines = [
@@ -601,12 +993,33 @@ elif page == "📊 Insights & Export":
             f"Most Common Mood: {most_common_mood}",
             f"Most Frequent Symptom: {most_common_symptom}",
             f"Total Logged Cycles: {total_logged_cycles}",
+            f"Total Days with Water Tracking: {total_water_days}",
+            f"Average Daily Water Intake: {avg_daily_water} glasses",
             f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         ]
 
-        # Convert DataFrame to CSV (with summary)
+        # Convert DataFrames to CSV (with summary)
         buffer = io.StringIO()
-        cleaned_df.to_csv(buffer, index=False)
+
+        # Write period logs section
+        buffer.write("=== PERIOD LOGS ===\n")
+        if not period_logs.empty:
+            period_logs.to_csv(buffer, index=False)
+        else:
+            buffer.write("No period logs available\n")
+
+        buffer.write("\n=== DAILY WATER INTAKE SUMMARY ===\n")
+        if not water_daily_totals.empty:
+            water_daily_totals.to_csv(buffer, index=False)
+        else:
+            buffer.write("No water logs available\n")
+
+        buffer.write("\n=== RAW WATER ENTRIES (Detailed) ===\n")
+        if not water_logs_all.empty:
+            water_logs_all.to_csv(buffer, index=False)
+        else:
+            buffer.write("No detailed water entries available\n")
+
         buffer.write("\n\n" + "\n".join(summary_lines))
         csv_bytes = buffer.getvalue().encode('utf-8')
 
@@ -623,7 +1036,7 @@ elif page == "📊 Insights & Export":
             help="Click to download your cleaned and summarized RituCare data 🌸"
         )
 
-        st.caption("✨ Your file now includes a short summary section at the bottom!")
+        st.caption("✨ Your file now includes aggregated daily water totals, detailed entries, and summary statistics!")
     else:
         st.warning("⚠️ No data available to export. Please log your cycles first.")
 
