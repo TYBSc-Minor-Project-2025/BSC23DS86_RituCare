@@ -132,6 +132,7 @@ RituCare provides an end-to-end platform featuring:
 - **Flexible date management** with end-date updates
 - **Historical cycle visualization**
 - **Pattern recognition insights**
+- **Cycle history management** with selective deletion options
 
 ### 💧 Water Tracker
 - **Daily hydration goals** with customizable targets
